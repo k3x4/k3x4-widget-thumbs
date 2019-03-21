@@ -16,19 +16,32 @@ add_action('admin_enqueue_scripts', function($hook){
 });
 
 add_action( 'wp_ajax_k3x4_widgets_imgs', function(){
-    $ids = $_POST['ids'];
-    $ids = explode(',', $ids);
+    $elems = $_POST['ids'];
 
-    $urls = [];
-    foreach ($ids as $id) {
-        $meta = get_post_meta($id, '_wp_attachment_metadata', true);
-        $urls[] = [
-            'id' => $id,
-            'url' => wp_upload_dir()['baseurl'] . '/' . dirname($meta['file']) . '/' . $meta['sizes']['thumbnail']['file']
-        ];
+    $i = 0;
+    foreach ($elems as $elem) {
+        $meta = get_post_meta($elem['attachId'], '_wp_attachment_metadata', true);
+        $elems[$i++]['attachUrl'] = wp_upload_dir()['baseurl'] . '/' . dirname($meta['file']) . '/' . $meta['sizes']['thumbnail']['file'];
     }
 
-    echo json_encode($urls);
+    echo json_encode($elems);
 
     wp_die();
+});
+
+add_action('admin_head', function(){
+    ?>
+    <style>
+        #widgets-right .widget[id*="media_image"] .widget-top,
+        #widgets-right .widget[id*="media_image"] .widget-top .inject-img,
+        #widgets-right .widget[id*="media_image"] .widget-top .ui-sortable-handle{
+            width: auto;
+            height: 100px;
+        }
+        #widgets-right .widget[id*="media_image"] .widget-top .inject-img{
+            display: inline-block;
+            float: left;
+        }
+    </style>
+    <?php
 });
